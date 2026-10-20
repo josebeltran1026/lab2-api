@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${pageTitle}">User Management</title>
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+</head>
+<body class="bg-light">
+    <main class="container py-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 th:text="${pageTitle}">User Management</h1>
+                <p class="lead">
+                    CST-339 Lab 4: Registration, Login, and Administration
+                </p>
+
+                <div class="alert alert-warning">
+                    This lab is intentionally insecure. Spring Security
+                    authentication and authorization will be added in Lab 5.
+                </div>
+
+                <p>
+                    Thymeleaf renders this page on the server.
+                    Album endpoints continue to return JSON.
+                </p>
+
+                <a class="btn btn-primary"
+                   th:href="@{/swagger-ui/index.html}">
+                    Open API Documentation
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

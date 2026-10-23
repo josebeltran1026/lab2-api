@@ -13,6 +13,13 @@
         <div class="card shadow-sm">
             <div class="card-body p-4">
                 <h1 th:text="${pageTitle}">User Management</h1>
+
+                <div class="alert alert-success"
+                th:if="${successMessage != null}"
+                th:text="${successMessage}">
+                Success message
+                </div>
+                
                 <p class="lead">
                     CST-339 Lab 4: Registration, Login, and Administration
                 </p>

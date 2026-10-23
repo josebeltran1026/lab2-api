@@ -9,6 +9,7 @@
         rel="stylesheet">
 </head>
 <body class="bg-light">
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
     <main class="container py-5">
         <div class="card shadow-sm">
             <div class="card-body p-4">
@@ -41,5 +42,6 @@
             </div>
         </div>
     </main>
+    <script th:replace="~{fragments/navbar :: bootstrapScript}"></script>
 </body>
 </html>

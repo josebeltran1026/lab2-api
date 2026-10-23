@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>User Administration</title>
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+</head>
+<body class="bg-light">
+    <main class="container py-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-3">User Administration</h1>
+
+                <div class="alert alert-warning">
+                    Lab 4: this administration page is unprotected.
+                    Role authorization will be added in Lab 5.
+                </div>
+
+                <div class="alert alert-success"
+                     th:if="${successMessage != null}"
+                     th:text="${successMessage}">
+                    Success message
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <caption>
+                            User accounts and account settings
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Username</th>
+                                <th scope="col">Role</th>
+                                <th scope="col">Enabled</th>
+                                <th scope="col">Password Change Required</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td th:text="${user.userId}">1</td>
+                                <td th:text="${user.username}">Username</td>
+                                <td th:text="${user.role}">USER</td>
+                                <td th:text="${user.enabled ? 'Yes' : 'No'}">
+                                    Yes
+                                </td>
+                                <td th:text="${user.passwordChangeRequired ? 'Yes' : 'No'}">
+                                    No
+                                </td>
+                                <td>
+                                    <a class="btn btn-sm btn-outline-primary"
+                                       th:href="@{/admin/users/{id}/edit(id=${user.userId})}"
+                                       th:aria-label="|Edit ${user.username}|">
+                                        Edit
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="6" class="text-center">
+                                    No users found.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <a th:href="@{/users}"
+                   class="btn btn-outline-secondary">
+                    Back to User Management
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

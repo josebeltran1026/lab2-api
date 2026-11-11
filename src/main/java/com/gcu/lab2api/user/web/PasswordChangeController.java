@@ -42,10 +42,10 @@ public class PasswordChangeController {
     @GetMapping("/change-password")
     public String showForm(
             @ModelAttribute("passwordChange") PasswordChangeViewModel form,
-            HttpSession session,
+            java.security.Principal principal,
             Model model) {
 
-        UserSummaryViewModel user = currentUser(session);
+        UserSummaryViewModel user = currentUser(principal);
         if (user == null) {
             return "redirect:/login";
         }
@@ -59,11 +59,12 @@ public class PasswordChangeController {
             @Valid @ModelAttribute("passwordChange")
                 PasswordChangeViewModel form,
             BindingResult bindingResult,
+            java.security.Principal principal,
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes) {
 
-        UserSummaryViewModel user = currentUser(session);
+        UserSummaryViewModel user = currentUser(principal);
         if (user == null) {
             return "redirect:/login";
         }
@@ -81,7 +82,7 @@ public class PasswordChangeController {
             return "change-password";
         }
 
-        session.removeAttribute("demoUserId");
+        session.invalidate();
         redirectAttributes.addFlashAttribute(
             "successMessage",
             "Password changed successfully. Please log in again."
@@ -90,23 +91,13 @@ public class PasswordChangeController {
         return "redirect:/login";
     }
 
-    private UserSummaryViewModel currentUser(HttpSession session) {
-        Object value = session.getAttribute("demoUserId");
-
-        if (!(value instanceof Integer userId)) {
-            return null;
-        }
-
-        try {
-            UserSummaryViewModel user = userService.findById(userId);
-            if (user.isEnabled()) {
-                return user;
-            }
-        } catch (IllegalArgumentException ex) {
-            // The demonstration account no longer exists.
-        }
-
-        session.removeAttribute("demoUserId");
+    private UserSummaryViewModel currentUser(java.security.Principal principal) {
+    if (principal == null) {
         return null;
+    }
+
+    return userService.findByUsername(principal.getName())
+            .filter(UserSummaryViewModel::isEnabled)
+            .orElse(null);
     }
 }

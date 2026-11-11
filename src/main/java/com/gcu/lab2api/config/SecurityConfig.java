@@ -8,6 +8,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import jakarta.servlet.DispatcherType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Configures public routes and authentication for the browser and API.
@@ -53,5 +55,15 @@ public class SecurityConfig {
                     .permitAll());
 
         return http.build();
+    }
+
+    /**
+     * Provides the BCrypt encoder used to verify stored password hashes.
+     *
+     * @return the BCrypt password encoder
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

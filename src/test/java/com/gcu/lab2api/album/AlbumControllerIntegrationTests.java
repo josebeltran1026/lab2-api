@@ -8,6 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -18,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@WithMockUser(roles = "ADMIN")
 class AlbumControllerIntegrationTests {
 
     private static final Integer TEST_ALBUM_ID = 9999;
@@ -40,9 +43,15 @@ class AlbumControllerIntegrationTests {
 
     @Test
     void getAlbumByIdReturnsAlbum() throws Exception {
-        mockMvc.perform(get("/api/albums/1"))
+        Album album = new Album();
+        album.setAlbumId(TEST_ALBUM_ID);
+        album.setTitle("Album for GET by ID");
+        album.setArtistId(1);
+        albumRepository.saveAndFlush(album);
+
+        mockMvc.perform(get("/api/albums/{id}", TEST_ALBUM_ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.albumId").value(1));
+                .andExpect(jsonPath("$.albumId").value(TEST_ALBUM_ID));
     }
 
     @Test
@@ -62,7 +71,8 @@ class AlbumControllerIntegrationTests {
                 }
                 """;
 
-        mockMvc.perform(post("/api/albums")
+            mockMvc.perform(post("/api/albums")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isCreated())
@@ -87,7 +97,8 @@ class AlbumControllerIntegrationTests {
                 }
                 """;
 
-        mockMvc.perform(put("/api/albums/{id}", TEST_ALBUM_ID)
+            mockMvc.perform(put("/api/albums/{id}", TEST_ALBUM_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isOk())
@@ -103,7 +114,7 @@ class AlbumControllerIntegrationTests {
         album.setArtistId(1);
         albumRepository.save(album);
 
-        mockMvc.perform(delete("/api/albums/{id}", TEST_ALBUM_ID))
+        mockMvc.perform(delete("/api/albums/{id}", TEST_ALBUM_ID).with(csrf()))
                 .andExpect(status().isNoContent());
     }
 }

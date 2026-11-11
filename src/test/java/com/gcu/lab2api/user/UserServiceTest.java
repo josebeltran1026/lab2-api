@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.gcu.lab2api.user.viewmodel.LoginViewModel;
 import com.gcu.lab2api.user.viewmodel.PasswordChangeViewModel;
 import com.gcu.lab2api.user.viewmodel.RegistrationViewModel;
 import com.gcu.lab2api.user.viewmodel.UserUpdateViewModel;
@@ -37,12 +37,13 @@ class UserServiceTest {
 
     private ValidatorFactory validatorFactory;
     private UserService service;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @BeforeEach
     void setUp() {
         validatorFactory = Validation.buildDefaultValidatorFactory();
         service = new UserService(
-                repository, validatorFactory.getValidator());
+                repository, validatorFactory.getValidator(), passwordEncoder);
     }
 
     @AfterEach
@@ -94,30 +95,6 @@ class UserServiceTest {
     }
 
     @Test
-    void loginAcceptsCorrectPasswordAndRejectsWrongPassword() {
-        when(repository.findByUsername("jose"))
-                .thenReturn(Optional.of(user(Role.USER)));
-
-        assertTrue(service.validateLogin(login("test-password")).isPresent());
-        assertTrue(service.validateLogin(login("wrong-password")).isEmpty());
-    }
-
-    @Test
-    void loginRejectsMissingAndDisabledAccounts() {
-        when(repository.findByUsername("jose"))
-                .thenReturn(Optional.empty());
-
-        assertTrue(service.validateLogin(login("test-password")).isEmpty());
-
-        User disabled = user(Role.USER);
-        disabled.setEnabled(false);
-        when(repository.findByUsername("jose"))
-                .thenReturn(Optional.of(disabled));
-
-        assertTrue(service.validateLogin(login("test-password")).isEmpty());
-    }
-
-    @Test
     void administrationRejectsInvalidRole() {
         var form = new UserUpdateViewModel();
         form.setRole("OWNER");
@@ -158,7 +135,7 @@ class UserServiceTest {
 
         service.changePassword(1, passwordChange());
 
-        assertEquals("replacement-password", user.getPassword());
+        assertTrue(passwordEncoder.matches("replacement-password", user.getPassword()));
         assertFalse(user.isPasswordChangeRequired());
         verify(repository).saveAndFlush(user);
     }
@@ -180,7 +157,7 @@ class UserServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> service.changePassword(1, form));
 
-        assertEquals("test-password", user.getPassword());
+        assertTrue(passwordEncoder.matches("test-password", user.getPassword()));
         verify(repository, never()).saveAndFlush(any(User.class));
     }
 
@@ -189,13 +166,6 @@ class UserServiceTest {
         form.setUsername(username);
         form.setPassword("test-password");
         form.setConfirmPassword("test-password");
-        return form;
-    }
-
-    private LoginViewModel login(String password) {
-        var form = new LoginViewModel();
-        form.setUsername("jose");
-        form.setPassword(password);
         return form;
     }
 
@@ -210,7 +180,7 @@ class UserServiceTest {
     private User user(Role role) {
         User user = new User();
         user.setUsername("jose");
-        user.setPassword("test-password");
+        user.setPassword(passwordEncoder.encode("test-password"));
         user.setRole(role);
         return user;
     }

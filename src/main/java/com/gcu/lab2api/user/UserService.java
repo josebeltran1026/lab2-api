@@ -57,7 +57,7 @@ public class UserService {
 
         User user = new User();
         user.setUsername(username);
-        user.setPassword(form.getPassword());
+        user.setPassword(passwordEncoder.encode(form.getPassword()));
         user.setRole(Role.USER);
         user.setEnabled(true);
         user.setPasswordChangeRequired(false);

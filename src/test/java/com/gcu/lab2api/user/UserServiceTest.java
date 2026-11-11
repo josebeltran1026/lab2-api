@@ -63,6 +63,8 @@ class UserServiceTest {
         assertTrue(result.isEnabled());
         assertFalse(result.isPasswordChangeRequired());
         verify(repository).existsByUsername("jose");
+        verify(repository).saveAndFlush(argThat(savedUser ->
+                passwordEncoder.matches("test-password", savedUser.getPassword())));
     }
 
     @Test

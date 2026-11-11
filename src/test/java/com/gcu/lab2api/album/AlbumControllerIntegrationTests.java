@@ -42,6 +42,7 @@ class AlbumControllerIntegrationTests {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void getAlbumByIdReturnsAlbum() throws Exception {
         Album album = new Album();
         album.setAlbumId(TEST_ALBUM_ID);
@@ -116,5 +117,18 @@ class AlbumControllerIntegrationTests {
 
         mockMvc.perform(delete("/api/albums/{id}", TEST_ALBUM_ID).with(csrf()))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void userCannotCreateUpdateOrDeleteAlbums() throws Exception {
+        mockMvc.perform(post("/api/albums").with(csrf()))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(put("/api/albums/{id}", TEST_ALBUM_ID).with(csrf()))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete("/api/albums/{id}", TEST_ALBUM_ID).with(csrf()))
+                .andExpect(status().isForbidden());
     }
 }

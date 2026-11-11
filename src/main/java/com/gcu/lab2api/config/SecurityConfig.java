@@ -10,6 +10,7 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
 import jakarta.servlet.DispatcherType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpMethod;
 
 /**
  * Configures public routes and authentication for the browser and API.
@@ -41,6 +42,10 @@ public class SecurityConfig {
                             "/favicon.ico")
                     .permitAll()
                     .requestMatchers("/admin/users", "/admin/users/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/albums", "/api/albums/**")
+                    .hasAnyRole("USER", "ADMIN")
+                    .requestMatchers("/api/albums", "/api/albums/**")
+                    .hasRole("ADMIN")
                     .anyRequest().authenticated())
                 .formLogin(form -> form
                     .loginPage("/login")

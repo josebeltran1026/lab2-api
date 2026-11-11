@@ -39,6 +39,12 @@
                    th:href="@{/swagger-ui/index.html}">
                     Open API Documentation
                 </a>
+
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-secondary ms-2">
+                        Sign out
+                    </button>
+                </form>
             </div>
         </div>
     </main>

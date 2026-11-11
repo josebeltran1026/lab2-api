@@ -22,7 +22,16 @@
                              th:text="${successMessage}">
                             Success message
                         </div>
+                        <div class="alert alert-danger" role="alert"
+                            th:if="${param.error != null}">
+                            Invalid username or password, or account is disabled.
+                        </div>
 
+                        <div class="alert alert-success" role="status"
+                            th:if="${param.logout != null}">
+                            You have been signed out.
+                        </div>
+                        
                         <form th:action="@{/login}"
                               th:object="${login}"
                               method="post">

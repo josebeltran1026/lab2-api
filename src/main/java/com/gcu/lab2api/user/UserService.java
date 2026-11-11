@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.gcu.lab2api.user.viewmodel.LoginViewModel;
 import com.gcu.lab2api.user.viewmodel.PasswordChangeViewModel;
 import com.gcu.lab2api.user.viewmodel.RegistrationViewModel;
 import com.gcu.lab2api.user.viewmodel.UserSummaryViewModel;
@@ -31,12 +31,16 @@ public class UserService {
 
     private final UserRepository repository;
     private final Validator validator;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository repository, Validator validator) {
+            public UserService(
+            UserRepository repository,
+            Validator validator,
+            PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.validator = validator;
+        this.passwordEncoder = passwordEncoder;
     }
-
     @Transactional
     public UserSummaryViewModel register(RegistrationViewModel form) {
         validate(form);
@@ -67,17 +71,6 @@ public class UserService {
         }
 
         return repository.findByUsername(username.strip())
-                .map(this::toSummary);
-    }
-
-    public Optional<UserSummaryViewModel> validateLogin(LoginViewModel form) {
-        if (form == null || !validator.validate(form).isEmpty()) {
-            return Optional.empty();
-        }
-
-        return repository.findByUsername(form.getUsername().strip())
-                .filter(User::isEnabled)
-                .filter(user -> user.getPassword().equals(form.getPassword()))
                 .map(this::toSummary);
     }
 
@@ -124,7 +117,7 @@ public class UserService {
         User user = requireUser(userId);
 
         if (!user.isEnabled()
-                || !user.getPassword().equals(form.getCurrentPassword())) {
+        || !passwordEncoder.matches(form.getCurrentPassword(), user.getPassword())) {
             throw new IllegalArgumentException(
                     "Unable to change password. Check your current credentials.");
         }
@@ -138,7 +131,7 @@ public class UserService {
                     "New password must differ from the current password.");
         }
 
-        user.setPassword(form.getNewPassword());
+        user.setPassword(passwordEncoder.encode(form.getNewPassword()));
         user.setPasswordChangeRequired(false);
         repository.saveAndFlush(user);
     }

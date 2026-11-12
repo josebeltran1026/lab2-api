@@ -27,9 +27,3 @@ COMMENT ON COLUMN users.enabled IS
 
 COMMENT ON COLUMN users.password_change_required IS
     'Whether the user must change their password at next sign-in.';
-
-INSERT INTO users (
-    username, password, role, enabled, password_change_required
-)
-VALUES ('admin', 'password', 'ADMIN', TRUE, TRUE)
-ON CONFLICT (username) DO NOTHING;

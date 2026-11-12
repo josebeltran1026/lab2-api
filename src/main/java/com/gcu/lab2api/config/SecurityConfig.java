@@ -11,6 +11,8 @@ import jakarta.servlet.DispatcherType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.HttpMethod;
+import com.gcu.lab2api.user.UserService;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 /**
  * Configures public routes and authentication for the browser and API.
@@ -22,11 +24,13 @@ public class SecurityConfig {
      * Defines which requests are public and how protected requests authenticate.
      *
      * @param http the HTTP security configuration
+     * @param userService the service used to check whether a password change is required
      * @return the configured security filter chain
      * @throws Exception if the filter chain cannot be built
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+     public SecurityFilterChain securityFilterChain(
+         HttpSecurity http, UserService userService) throws Exception {
         BasicAuthenticationEntryPoint apiEntryPoint = new BasicAuthenticationEntryPoint();
         apiEntryPoint.setRealmName("Chinook API");
 
@@ -60,6 +64,9 @@ public class SecurityConfig {
                     .logoutSuccessUrl("/login?logout")
                     .permitAll());
 
+        http.addFilterBefore(
+            new PasswordChangeRequiredFilter(userService),
+            AuthorizationFilter.class);
         return http.build();
     }
 

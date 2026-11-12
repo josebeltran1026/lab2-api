@@ -1,12 +1,14 @@
 package com.gcu.lab2api.user;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.DefaultApplicationArguments;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
  * Jose Beltran Veles
@@ -15,13 +17,16 @@ import org.springframework.boot.DefaultApplicationArguments;
  */
 class AdminBootstrapTest {
 
+    private static final String TEST_ADMIN_HASH =
+        new BCryptPasswordEncoder().encode("test-only-bootstrap-password");
+
     private UserRepository repository;
     private AdminBootstrap bootstrap;
 
     @BeforeEach
     void setUp() {
         repository = mock(UserRepository.class);
-        bootstrap = new AdminBootstrap(repository);
+        bootstrap = new AdminBootstrap(repository, TEST_ADMIN_HASH);
     }
 
     @Test
@@ -37,7 +42,7 @@ class AdminBootstrapTest {
         User admin = captor.getValue();
         assertAll(
             () -> assertEquals("admin", admin.getUsername()),
-            () -> assertEquals("password", admin.getPassword()),
+            () -> assertEquals(TEST_ADMIN_HASH, admin.getPassword()),
             () -> assertEquals(Role.ADMIN, admin.getRole()),
             () -> assertTrue(admin.isEnabled()),
             () -> assertTrue(admin.isPasswordChangeRequired())
